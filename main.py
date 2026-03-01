@@ -1,5 +1,9 @@
 import time
 import win32com.client as win
+import win32api
+import win32con
+
+
 def get_open_explorer_paths():
     shell = win.Dispatch("Shell.Application")
     paths = []
@@ -19,6 +23,15 @@ def check_dir(path):
             return None
 prev_path = None
 x = 0
+approve = False
+def ask_user(path):
+    result = win32api.MessageBox(
+        0,
+        f"Found autorun.run in:\n{path}\n\nRun it?",
+        "Autorun detected",
+        win32con.MB_YESNO | win32con.MB_ICONWARNING
+    )
+    return result == 6  # 6 = IDYES
 
 while True:
     paths = get_open_explorer_paths()
@@ -31,7 +44,12 @@ while True:
     if x == 0 and curr_path:
         content = check_dir(curr_path)
         if content:
-            exec(content)
+            approve = ask_user(curr_path)
+            if approve:
+                exec(content)
+                approve = False
+
+
         x += 1
 
     time.sleep(1)
