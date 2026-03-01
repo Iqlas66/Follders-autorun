@@ -1,1 +1,1 @@
-print("Hello World")
+import win32com.client as win
